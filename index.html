@@ -1,14 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather App</title>
-    <link rel="stylesheet" href="css/style.css">
+<title>Two-Column Layout with Colors</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: sans-serif;
+  }
+  .container {
+    display: flex;
+    height: 100vh;
+  }
+  .left-pane {
+    flex: 0 0 25%;
+    background-color: #e6f7ff; /* Light blue */
+    padding: 20px;
+  }
+  .right-pane {
+    flex: 1; /* Takes up the remaining space */
+    background-color: #e6ffe6; /* Light green */
+    padding: 20px;
+  }
+</style>
 </head>
 <body>
-    <h1>Weather App</h1>
-    <p>Check the current weather in your city.</p>
-    <script src="js/app.js"></script>
+
+  <div class="container">
+    <div class="left-pane">
+      <h1>Left Section (25%)</h1>
+      <p>This is the content for the left portion with a light blue background.</p>
+    </div>
+    <div class="right-pane">
+      <h1>Right Section (75%)</h1>
+      <form>
+        <label for="inputField">Enter the name:</label><br>
+        <input type="text" id="inputField" name="inputField"><br><br>
+        <label for="'inputField2">Enter the Email:</label><br>
+        <input type="email" id="inputField2" name="inputField2"><br><br>
+        <label for="dropdown">Choose your Age:</label><br>
+        <select id="dropdown" name="dropdown">
+          <option value="option1">18</option>
+          <option value="option2">19</option>
+          <option value="option3">20</option>
+        </select><br><br>
+        <input type="checkbox">Subscribe to our newsletter<br><br>
+        <input type="submit" value="Submit">
+      </form>
+      <p>This is the content for the right portion with a light green background.</p>
+    </div>
+  </div>
+   <script src="JS/app.js"></script>
 </body>
 </html>
