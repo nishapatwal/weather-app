@@ -1,5 +1,5 @@
 
-console.log("Hello, B-tech");
+/*console.log("Hello, B-tech");
 
 
 let name="Nisha";
@@ -88,7 +88,7 @@ for(let i=0;i<n;i++){
 console.log(arr);*/
 
 // filer for numbers divisible by 10 from an array 
-let numarr = [10, 20, 30 ];
+/*let numarr = [10, 20, 30 ];
 console.log (" Array: ");
 console.log(numarr);
 let newNum = parseInt(prompt("Enter a number to add:")); 
@@ -126,4 +126,4 @@ let prices = [645,250,300,900,50];
 for(let i=0;i<prices.length;i++){
     prices[i]=prices[i]- (prices[i]*10)/100;
 }
-console.log("Final prices after 10% off:",prices);
+console.log("Final prices after 10% off:",prices);*/
