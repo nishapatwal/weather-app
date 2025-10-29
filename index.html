@@ -1,11 +1,183 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>My Weather App</title>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WeatherCast - Your Weather Companion</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="CSS/style.css">
 </head>
+
 <body>
-<div id="date-display"></div>
-   <script src="JS/app.js"></script>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-background">
+      <div class="weather-animation">
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+        <div class="cloud cloud3"></div>
+        <div class="sun"></div>
+      </div>
+      <!-- 3D Floating Particles -->
+      <div class="particles-container">
+        <div class="particle particle-1"></div>
+        <div class="particle particle-2"></div>
+        <div class="particle particle-3"></div>
+        <div class="particle particle-4"></div>
+        <div class="particle particle-5"></div>
+        <div class="particle particle-6"></div>
+        <div class="particle particle-7"></div>
+        <div class="particle particle-8"></div>
+      </div>
+    </div>
+    
+    <div class="hero-content">
+      <div class="container">
+        <h1 class="hero-title">
+          <span class="gradient-text">WeatherCast</span>
+          <i class="fas fa-cloud-sun"></i>
+        </h1>
+        <p class="hero-subtitle">Get accurate weather forecasts for any location worldwide</p>
+        
+        <!-- Search Bar -->
+        <div class="search-container">
+          <div class="search-box">
+            <input type="text" id="cityInput" placeholder="Enter city name..." autocomplete="off">
+            <button id="searchBtn" class="search-btn">
+              <i class="fas fa-search"></i>
+            </button>
+            <button id="locationBtn" class="location-btn" title="Use current location">
+              <i class="fas fa-map-marker-alt"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Weather Display Section -->
+  <section class="weather-section">
+    <div class="container">
+      <div class="weather-card" id="weatherCard" style="display: none;">
+        <div class="weather-header">
+          <div class="location-info">
+            <h2 id="cityName">Loading...</h2>
+            <p id="countryName">Loading...</p>
+          </div>
+          <div class="weather-icon" id="weatherIcon">
+            <i class="fas fa-sun"></i>
+          </div>
+        </div>
+        
+        <div class="weather-main">
+          <div class="temperature">
+            <span id="temperature">--</span>
+            <span class="unit">°C</span>
+          </div>
+          <div class="weather-description" id="weatherDescription">Loading...</div>
+        </div>
+        
+        <div class="weather-details">
+          <div class="detail-item">
+            <i class="fas fa-eye"></i>
+            <span>Visibility</span>
+            <span id="visibility">-- km</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-tint"></i>
+            <span>Humidity</span>
+            <span id="humidity">--%</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-wind"></i>
+            <span>Wind Speed</span>
+            <span id="windSpeed">-- m/s</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-thermometer-half"></i>
+            <span>Feels Like</span>
+            <span id="feelsLike">--°C</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Loading State -->
+      <div class="loading-state" id="loadingState">
+        <div class="loading-spinner"></div>
+        <p>Fetching weather data...</p>
+      </div>
+      
+      <!-- Error State -->
+      <div class="error-state" id="errorState" style="display: none;">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h3>Oops! Something went wrong</h3>
+        <p id="errorMessage">Unable to fetch weather data. Please try again.</p>
+        <button class="retry-btn" onclick="retryWeather()">Try Again</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="container">
+      <h2 class="section-title">Why Choose WeatherCast?</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <h3>Real-time Updates</h3>
+          <p>Get the most current weather information with live updates every few minutes.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-globe"></i>
+          </div>
+          <h3>Global Coverage</h3>
+          <p>Access weather data for any city worldwide with comprehensive coverage.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-mobile-alt"></i>
+          </div>
+          <h3>Mobile Friendly</h3>
+          <p>Responsive design that works perfectly on all devices and screen sizes.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3>Detailed Forecasts</h3>
+          <p>Comprehensive weather details including humidity, wind speed, and visibility.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3>WeatherCast</h3>
+          <p>Your reliable weather companion</p>
+        </div>
+        <div class="footer-links">
+          <a href="#privacy">Privacy Policy</a>
+          <a href="#terms">Terms of Service</a>
+          <a href="#contact">Contact Us</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2024 WeatherCast. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="JS/script.js"></script>
 </body>
 </html>

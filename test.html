@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherCast - Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #5a6fd8;
+        }
+        .test-result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>WeatherCast - Error Testing</h1>
+    
+    <div class="test-section">
+        <h2>API Connection Test</h2>
+        <button class="test-button" onclick="testAPI()">Test Weather API</button>
+        <div id="apiResult" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Geolocation Test</h2>
+        <button class="test-button" onclick="testGeolocation()">Test Location Access</button>
+        <div id="geoResult" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Error Handling Test</h2>
+        <button class="test-button" onclick="testErrorHandling()">Test Error Scenarios</button>
+        <div id="errorResult" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Main App Test</h2>
+        <button class="test-button" onclick="testMainApp()">Test Main Weather App</button>
+        <div id="appResult" class="test-result"></div>
+    </div>
+
+    <script>
+        async function testAPI() {
+            const result = document.getElementById('apiResult');
+            result.textContent = 'Testing API connection...';
+            
+            try {
+                const response = await fetch('https://api.openweathermap.org/data/2.5/weather?q=London&appid=b6907d289e10d714a6e88b30761fae22&units=metric');
+                const data = await response.json();
+                
+                if (data.cod === 200) {
+                    result.textContent = '✅ API connection successful!';
+                    result.className = 'test-result success';
+                } else {
+                    result.textContent = `❌ API error: ${data.message}`;
+                    result.className = 'test-result error';
+                }
+            } catch (error) {
+                result.textContent = `❌ Network error: ${error.message}`;
+                result.className = 'test-result error';
+            }
+        }
+        
+        function testGeolocation() {
+            const result = document.getElementById('geoResult');
+            result.textContent = 'Testing geolocation...';
+            
+            if (!navigator.geolocation) {
+                result.textContent = '❌ Geolocation not supported';
+                result.className = 'test-result error';
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    result.textContent = `✅ Geolocation working! Lat: ${position.coords.latitude}, Lon: ${position.coords.longitude}`;
+                    result.className = 'test-result success';
+                },
+                (error) => {
+                    result.textContent = `❌ Geolocation error: ${error.message}`;
+                    result.className = 'test-result error';
+                }
+            );
+        }
+        
+        function testErrorHandling() {
+            const result = document.getElementById('errorResult');
+            result.textContent = 'Testing error handling...';
+            
+            try {
+                // Test invalid city
+                fetch('https://api.openweathermap.org/data/2.5/weather?q=InvalidCityName123&appid=b6907d289e10d714a6e88b30761fae22&units=metric')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.cod === 404) {
+                            result.textContent = '✅ Error handling working! (404 handled correctly)';
+                            result.className = 'test-result success';
+                        } else {
+                            result.textContent = `❌ Unexpected response: ${JSON.stringify(data)}`;
+                            result.className = 'test-result error';
+                        }
+                    })
+                    .catch(error => {
+                        result.textContent = `❌ Network error: ${error.message}`;
+                        result.className = 'test-result error';
+                    });
+            } catch (error) {
+                result.textContent = `❌ Test error: ${error.message}`;
+                result.className = 'test-result error';
+            }
+        }
+        
+        function testMainApp() {
+            const result = document.getElementById('appResult');
+            result.textContent = 'Testing main app...';
+            
+            try {
+                // Check if main app files exist
+                const script = document.createElement('script');
+                script.src = 'JS/script.js';
+                script.onload = () => {
+                    if (window.weatherApp) {
+                        result.textContent = '✅ Main app loaded successfully!';
+                        result.className = 'test-result success';
+                    } else {
+                        result.textContent = '❌ App loaded but weatherApp not found';
+                        result.className = 'test-result error';
+                    }
+                };
+                script.onerror = () => {
+                    result.textContent = '❌ Failed to load script.js';
+                    result.className = 'test-result error';
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                result.textContent = `❌ Test error: ${error.message}`;
+                result.className = 'test-result error';
+            }
+        }
+    </script>
+</body>
+</html>
