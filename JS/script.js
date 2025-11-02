@@ -200,7 +200,8 @@ class WeatherApp {
                         icon: this.getWeatherIcon(data.current_condition[0].weatherDesc[0].value)
                     }],
                     visibility: parseInt(data.current_condition[0].visibility) * 1000, // Convert km to m
-                    wind: { speed: parseFloat(data.current_condition[0].windspeedKmph) / 3.6 } // Convert km/h to m/s
+                    wind: { speed: parseFloat(data.current_condition[0].windspeedKmph) / 3.6 }, // Convert km/h to m/s
+                    forecastData: data.weather // Store forecast data for 3-day forecast
                 };
                 
                 return weatherData;
@@ -254,7 +255,8 @@ class WeatherApp {
                         icon: this.getWeatherIcon(data.current_condition[0].weatherDesc[0].value)
                     }],
                     visibility: parseInt(data.current_condition[0].visibility) * 1000, // Convert km to m
-                    wind: { speed: parseFloat(data.current_condition[0].windspeedKmph) / 3.6 } // Convert km/h to m/s
+                    wind: { speed: parseFloat(data.current_condition[0].windspeedKmph) / 3.6 }, // Convert km/h to m/s
+                    forecastData: data.weather // Store forecast data for 3-day forecast
                 };
                 
                 return weatherData;
@@ -394,11 +396,131 @@ class WeatherApp {
             weatherCard.style.opacity = '1';
         }, 50);
 
+        // Display 3-day forecast if forecast data is available
+        if (data.forecastData && data.forecastData.length > 0) {
+            this.displayForecast(data.forecastData);
+        }
+
         // Clear search input
         document.getElementById('cityInput').value = '';
 
         // Store last searched city
         localStorage.setItem('lastSearchedCity', data.name);
+    }
+
+    displayForecast(forecastData) {
+        const forecastContainer = document.getElementById('forecastContainer');
+        const forecastGrid = document.getElementById('forecastGrid');
+        
+        if (!forecastContainer || !forecastGrid) return;
+
+        // Get today + next 2 days (3 days total: today, tomorrow, day after tomorrow)
+        const forecastDays = forecastData.slice(0, 3);
+        
+        if (forecastDays.length === 0) {
+            forecastContainer.style.display = 'none';
+            return;
+        }
+
+        forecastGrid.innerHTML = '';
+
+        forecastDays.forEach((day, index) => {
+            // Parse date - wttr.in uses 'YYYY-MM-DD' format
+            let date;
+            if (day.date) {
+                date = new Date(day.date);
+                // Check if date is valid
+                if (isNaN(date.getTime())) {
+                    // Try parsing as YYYY-MM-DD if invalid
+                    const dateParts = day.date.split('-');
+                    if (dateParts.length === 3) {
+                        date = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+                    } else {
+                        // Fallback to today + index days
+                        date = new Date();
+                        date.setDate(date.getDate() + index);
+                    }
+                }
+            } else {
+                // Fallback to today + index days
+                date = new Date();
+                date.setDate(date.getDate() + index);
+            }
+            
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            // Show "Today" for first card, otherwise show day name
+            const isToday = index === 0;
+            const dayName = isToday ? 'Today' : dayNames[date.getDay()];
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const dateStr = `${monthNames[date.getMonth()]} ${date.getDate()}`;
+
+            // Get average temperature from hourly data or use max/min
+            const avgTemp = day.avgtempC ? parseFloat(day.avgtempC) : 
+                           (parseFloat(day.maxtempC) + parseFloat(day.mintempC)) / 2;
+            const maxTemp = parseFloat(day.maxtempC);
+            const minTemp = parseFloat(day.mintempC);
+
+            // Get weather description from hourly data (usually take noon or midday)
+            const hourlyData = day.hourly || [];
+            const noonData = hourlyData[Math.floor(hourlyData.length / 2)] || hourlyData[0] || day;
+            const weatherDesc = noonData.weatherDesc ? noonData.weatherDesc[0].value : 
+                               (day.hourly && day.hourly[0] && day.hourly[0].weatherDesc ? 
+                                day.hourly[0].weatherDesc[0].value : 'Clear');
+            const weatherMain = this.getWeatherMain(weatherDesc);
+
+            const forecastCard = document.createElement('div');
+            forecastCard.className = 'forecast-card';
+            forecastCard.innerHTML = `
+                <div class="forecast-date">
+                    <div class="forecast-day">${dayName}</div>
+                    <div class="forecast-date-num">${dateStr}</div>
+                </div>
+                <div class="forecast-icon">
+                    <i class="${this.getForecastIconClass(weatherMain)}"></i>
+                </div>
+                <div class="forecast-weather">${weatherDesc}</div>
+                <div class="forecast-temp">
+                    <span class="forecast-temp-max">${Math.round(maxTemp)}°</span>
+                    <span class="forecast-temp-min">${Math.round(minTemp)}°</span>
+                </div>
+                <div class="forecast-details">
+                    <div class="forecast-detail-item">
+                        <i class="fas fa-tint"></i>
+                        <span>${day.avgHumidity || (day.hourly && day.hourly[0] ? day.hourly[0].humidity : '--')}%</span>
+                    </div>
+                    <div class="forecast-detail-item">
+                        <i class="fas fa-wind"></i>
+                        <span>${day.maxWindSpeedKmph || (day.hourly && day.hourly[0] ? day.hourly[0].windspeedKmph : '--')} km/h</span>
+                    </div>
+                </div>
+            `;
+
+            forecastGrid.appendChild(forecastCard);
+        });
+
+        forecastContainer.style.display = 'block';
+        
+        // Fade in animation
+        forecastContainer.style.opacity = '0';
+        setTimeout(() => {
+            forecastContainer.style.transition = 'opacity 0.3s ease';
+            forecastContainer.style.opacity = '1';
+        }, 100);
+    }
+
+    getForecastIconClass(weatherMain) {
+        const iconMap = {
+            'Clear': 'fas fa-sun',
+            'Clouds': 'fas fa-cloud',
+            'Rain': 'fas fa-cloud-rain',
+            'Drizzle': 'fas fa-cloud-drizzle',
+            'Thunderstorm': 'fas fa-bolt',
+            'Snow': 'fas fa-snowflake',
+            'Mist': 'fas fa-smog',
+            'Fog': 'fas fa-smog',
+            'Haze': 'fas fa-smog'
+        };
+        return iconMap[weatherMain] || 'fas fa-cloud-sun';
     }
 
     updateWeatherIcon(weatherMain, iconCode) {
@@ -469,6 +591,10 @@ class WeatherApp {
         document.getElementById('loadingState').style.display = 'block';
         document.getElementById('weatherCard').style.display = 'none';
         document.getElementById('errorState').style.display = 'none';
+        const forecastContainer = document.getElementById('forecastContainer');
+        if (forecastContainer) {
+            forecastContainer.style.display = 'none';
+        }
     }
 
     hideLoading() {
@@ -478,6 +604,11 @@ class WeatherApp {
     showError(message) {
         this.hideLoading();
         document.getElementById('weatherCard').style.display = 'none';
+        
+        const forecastContainer = document.getElementById('forecastContainer');
+        if (forecastContainer) {
+            forecastContainer.style.display = 'none';
+        }
         
         const errorState = document.getElementById('errorState');
         const errorMessage = document.getElementById('errorMessage');
