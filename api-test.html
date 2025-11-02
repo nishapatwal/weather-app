@@ -65,6 +65,14 @@
         <button class="test-button" onclick="testLocationAPI()">Test Location API</button>
         <div id="locationResult" class="test-result"></div>
     </div>
+    
+    <div class="test-section">
+        <h2>Forecast Test (3-Day)</h2>
+        <input type="text" id="forecastCityInput" placeholder="Enter city name" style="padding: 8px; margin: 5px; border: 1px solid #ccc; border-radius: 4px;">
+        <button class="test-button" onclick="testForecast()">Test 3-Day Forecast</button>
+        <div id="forecastResult" class="test-result"></div>
+        <div id="forecastCards" style="margin-top: 20px;"></div>
+    </div>
 
     <script>
         async function testAlternativeAPI() {
@@ -146,6 +154,72 @@
                     result.className = 'test-result error';
                 }
             );
+        }
+        
+        async function testForecast() {
+            const city = document.getElementById('forecastCityInput').value || 'London';
+            const result = document.getElementById('forecastResult');
+            const forecastCards = document.getElementById('forecastCards');
+            result.textContent = `Testing 3-day forecast for: ${city}...`;
+            result.className = 'test-result info';
+            forecastCards.innerHTML = '';
+            
+            try {
+                const response = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=j1`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const forecastData = data.weather || [];
+                    
+                    if (forecastData.length > 0) {
+                        // Get first 3 days
+                        const forecastDays = forecastData.slice(0, 3);
+                        
+                        result.textContent = `✅ Forecast data retrieved!\n\nFound ${forecastData.length} days of forecast data\nDisplaying first 3 days:\n`;
+                        result.className = 'test-result success';
+                        
+                        // Display forecast cards
+                        forecastDays.forEach((day, index) => {
+                            const date = new Date(day.date);
+                            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                            const isToday = index === 0;
+                            const dayName = isToday ? 'Today' : dayNames[date.getDay()];
+                            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            const dateStr = `${monthNames[date.getMonth()]} ${date.getDate()}`;
+                            
+                            const maxTemp = parseFloat(day.maxtempC);
+                            const minTemp = parseFloat(day.mintempC);
+                            const hourlyData = day.hourly || [];
+                            const noonData = hourlyData[Math.floor(hourlyData.length / 2)] || hourlyData[0] || day;
+                            const weatherDesc = noonData.weatherDesc ? noonData.weatherDesc[0].value : 'Clear';
+                            const humidity = day.avgHumidity || (day.hourly && day.hourly[0] ? day.hourly[0].humidity : '--');
+                            const windSpeed = day.maxWindSpeedKmph || (day.hourly && day.hourly[0] ? day.hourly[0].windspeedKmph : '--');
+                            
+                            const card = document.createElement('div');
+                            card.style.cssText = 'background: white; padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd;';
+                            card.innerHTML = `
+                                <h3>${dayName} - ${dateStr}</h3>
+                                <p><strong>Weather:</strong> ${weatherDesc}</p>
+                                <p><strong>Temp:</strong> ${Math.round(maxTemp)}° / ${Math.round(minTemp)}°</p>
+                                <p><strong>Humidity:</strong> ${humidity}%</p>
+                                <p><strong>Wind Speed:</strong> ${windSpeed} km/h</p>
+                                <p><strong>Hourly Data Points:</strong> ${hourlyData.length}</p>
+                            `;
+                            forecastCards.appendChild(card);
+                            
+                            result.textContent += `\nDay ${index + 1}: ${dayName} (${dateStr}) - Max: ${Math.round(maxTemp)}°C, Min: ${Math.round(minTemp)}°C`;
+                        });
+                    } else {
+                        result.textContent = '❌ No forecast data available';
+                        result.className = 'test-result error';
+                    }
+                } else {
+                    result.textContent = `❌ API error: ${response.status}`;
+                    result.className = 'test-result error';
+                }
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+                result.className = 'test-result error';
+            }
         }
         
         // Auto-test on load
